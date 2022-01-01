@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-27 00:44:20
- * @LastEditTime: 2021-12-27 01:20:58
+ * @LastEditTime: 2022-01-01 16:45:57
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/tour/internal/sql2struct/template.go
@@ -10,9 +10,9 @@ package sql2struct
 
 import (
 	"fmt"
+	"go-programming-tour-book/tour/internal/word"
 	"os"
 	"text/template"
-	"tour/internal/word"
 )
 
 const strcutTpl = `type {{.TableName | ToCamelCase}} struct {

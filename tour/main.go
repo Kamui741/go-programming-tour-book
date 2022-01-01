@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-15 21:39:20
- * @LastEditTime: 2021-12-17 23:36:53
+ * @LastEditTime: 2022-01-01 16:45:38
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/tour/main.go
@@ -9,8 +9,8 @@
 package main
 
 import (
+	"go-programming-tour-book/tour/cmd"
 	"log"
-	"tour/cmd"
 )
 
 func main() {

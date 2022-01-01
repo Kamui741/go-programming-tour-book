@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-27 01:03:58
- * @LastEditTime: 2021-12-27 01:20:40
+ * @LastEditTime: 2022-01-01 16:46:23
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/tour/cmd/sql.go
@@ -9,8 +9,8 @@
 package cmd
 
 import (
+	"go-programming-tour-book/tour/internal/sql2struct"
 	"log"
-	"tour/internal/sql2struct"
 
 	"github.com/spf13/cobra"
 )

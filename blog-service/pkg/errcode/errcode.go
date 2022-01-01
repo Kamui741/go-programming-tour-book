@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-30 22:16:03
- * @LastEditTime: 2021-12-30 22:29:20
+ * @LastEditTime: 2022-01-01 16:43:10
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/pkg/errcode/errcode.go
@@ -14,8 +14,11 @@ import (
 )
 
 type Error struct {
-	code    int      `json:"code"`
-	msg     string   `json:"msg"`
+	// 错误码
+	code int `json:"code"`
+	// 错误消息
+	msg string `json:"msg"`
+	// 详细信息
 	details []string `json:"details"`
 }
 

@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-17 19:11:35
- * @LastEditTime: 2021-12-23 22:16:10
+ * @LastEditTime: 2022-01-01 16:46:37
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/tour/cmd/word.go
@@ -9,9 +9,9 @@
 package cmd
 
 import (
+	"go-programming-tour-book/tour/internal/word"
 	"log"
 	"strings"
-	"tour/internal/word"
 
 	"github.com/spf13/cobra"
 )

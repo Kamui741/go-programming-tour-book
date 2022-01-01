@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-23 22:14:35
- * @LastEditTime: 2021-12-26 22:25:01
+ * @LastEditTime: 2022-01-01 16:46:30
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/tour/cmd/timer.go
@@ -9,11 +9,11 @@
 package cmd
 
 import (
+	"go-programming-tour-book/tour/internal/timer"
 	"log"
 	"strconv"
 	"strings"
 	"time"
-	"tour/internal/timer"
 
 	"github.com/spf13/cobra"
 )

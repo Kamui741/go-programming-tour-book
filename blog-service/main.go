@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-28 14:36:51
- * @LastEditTime: 2021-12-31 16:33:49
+ * @LastEditTime: 2022-01-02 01:01:35
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/main.go
@@ -11,7 +11,7 @@ package main
 import (
 	"go-programming-tour-book/blog-service/global"
 	"go-programming-tour-book/blog-service/internal/model"
-	"go-programming-tour-book/blog-service/internal/routers"
+	routers "go-programming-tour-book/blog-service/internal/routers"
 	"go-programming-tour-book/blog-service/pkg/logger"
 	"go-programming-tour-book/blog-service/pkg/setting"
 	"log"
@@ -38,6 +38,10 @@ func init() {
 
 }
 
+// @title 博客系统
+// @version 1.0
+// @description Go 语言编程之旅：一起用 Go 做项目
+// @termsOfService https://github.com/go-programming-tour-book
 func main() {
 	gin.SetMode(global.ServerSetting.RunMode)
 	router := routers.NewRouter()
@@ -59,7 +63,7 @@ func setupSetting() error {
 	if err != nil {
 		return err
 	}
-	err = setting.ReadSection("App", &global.AddSetting)
+	err = setting.ReadSection("App", &global.AppSetting)
 	if err != nil {
 		return err
 	}
@@ -81,7 +85,7 @@ func setupDBEngine() error {
 }
 func setupLogger() error {
 	global.Logger = logger.NewLogger(&lumberjack.Logger{
-		FileName:  global.AddSetting.LogSavePath + "/" + global.AddSetting.LogFileName + global.AppSetting.LogFileExt,
+		FileName:  global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt,
 		MaxSize:   600,
 		MaxAge:    10,
 		LocalTime: true,

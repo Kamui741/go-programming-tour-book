@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-30 15:40:58
- * @LastEditTime: 2021-12-31 02:25:58
+ * @LastEditTime: 2022-01-02 00:52:33
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/internal/routers/router.go
@@ -12,12 +12,15 @@ import (
 	v1 "go-programming-tour-book/blog-service/internal/routers/api/v1"
 
 	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.GET("swagger/*any", ginSwagger.Warp.Handler(swaggerFiles.Handler))
 
 	article := v1.NewArticle()
 	tag := v1.NewTag()
