@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-28 14:36:51
- * @LastEditTime: 2022-01-02 01:01:35
+ * @LastEditTime: 2022-01-03 18:11:21
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/main.go
@@ -84,11 +84,13 @@ func setupDBEngine() error {
 	return nil
 }
 func setupLogger() error {
+	fileName := global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt
 	global.Logger = logger.NewLogger(&lumberjack.Logger{
-		FileName:  global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt,
-		MaxSize:   600,
+		Filename:  fileName,
+		MaxSize:   500,
 		MaxAge:    10,
 		LocalTime: true,
 	}, "", log.LstdFlags).WithCaller(2)
+
 	return nil
 }

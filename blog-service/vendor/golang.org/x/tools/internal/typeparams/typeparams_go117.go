@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !go1.18
-// +build !go1.18
+//go:build !typeparams || !go1.18
+// +build !typeparams !go1.18
 
 package typeparams
 
 import (
 	"go/ast"
-	"go/token"
 	"go/types"
 )
 
@@ -31,34 +30,6 @@ func GetIndexExprData(n ast.Node) *IndexExprData {
 	return nil
 }
 
-// PackIndexExpr returns an *ast.IndexExpr with the given index.
-// Calling PackIndexExpr with len(indices) != 1 will panic.
-func PackIndexExpr(x ast.Expr, lbrack token.Pos, indices []ast.Expr, rbrack token.Pos) ast.Expr {
-	switch len(indices) {
-	case 0:
-		panic("empty indices")
-	case 1:
-		return &ast.IndexExpr{
-			X:      x,
-			Lbrack: lbrack,
-			Index:  indices[0],
-			Rbrack: rbrack,
-		}
-	default:
-		panic("cannot pack multiple indices at this go version")
-	}
-}
-
-// IndexListExpr is a placeholder type, as type parameters are not supported at
-// this Go version. Its methods panic on use.
-type IndexListExpr struct {
-	ast.Expr
-	X       ast.Expr   // expression
-	Lbrack  token.Pos  // position of "["
-	Indices []ast.Expr // index expressions
-	Rbrack  token.Pos  // position of "]"
-}
-
 // ForTypeSpec returns an empty field list, as type parameters on not supported
 // at this Go version.
 func ForTypeSpec(*ast.TypeSpec) *ast.FieldList {
@@ -75,7 +46,6 @@ func ForFuncType(*ast.FuncType) *ast.FieldList {
 // this Go version. Its methods panic on use.
 type TypeParam struct{ types.Type }
 
-func (*TypeParam) Index() int             { unsupported(); return 0 }
 func (*TypeParam) Constraint() types.Type { unsupported(); return nil }
 func (*TypeParam) Obj() *types.TypeName   { unsupported(); return nil }
 
@@ -102,23 +72,28 @@ func SetTypeParamConstraint(tparam *TypeParam, constraint types.Type) {
 	unsupported()
 }
 
-// NewSignatureType calls types.NewSignature, panicking if recvTypeParams or
-// typeParams is non-empty.
-func NewSignatureType(recv *types.Var, recvTypeParams, typeParams []*TypeParam, params, results *types.Tuple, variadic bool) *types.Signature {
-	if len(recvTypeParams) != 0 || len(typeParams) != 0 {
-		panic("signatures cannot have type parameters at this Go version")
-	}
-	return types.NewSignature(recv, params, results, variadic)
-}
-
 // ForSignature returns an empty slice.
 func ForSignature(*types.Signature) *TypeParamList {
 	return nil
 }
 
+// SetForSignature panics if tparams is non-empty.
+func SetForSignature(_ *types.Signature, tparams []*TypeParam) {
+	if len(tparams) > 0 {
+		unsupported()
+	}
+}
+
 // RecvTypeParams returns a nil slice.
 func RecvTypeParams(sig *types.Signature) *TypeParamList {
 	return nil
+}
+
+// SetRecvTypeParams panics if rparams is non-empty.
+func SetRecvTypeParams(sig *types.Signature, rparams []*TypeParam) {
+	if len(rparams) > 0 {
+		unsupported()
+	}
 }
 
 // IsComparable returns false, as no interfaces are type-restricted at this Go
@@ -127,20 +102,11 @@ func IsComparable(*types.Interface) bool {
 	return false
 }
 
-// IsMethodSet returns true, as no interfaces are type-restricted at this Go
+// IsConstraint returns false, as no interfaces are type-restricted at this Go
 // version.
-func IsMethodSet(*types.Interface) bool {
-	return true
-}
-
-// IsImplicit returns false, as no interfaces are implicit at this Go version.
-func IsImplicit(*types.Interface) bool {
+func IsConstraint(*types.Interface) bool {
 	return false
 }
-
-// MarkImplicit does nothing, because this Go version does not have implicit
-// interfaces.
-func MarkImplicit(*types.Interface) {}
 
 // ForNamed returns an empty type parameter list, as type parameters are not
 // supported at this Go version.
@@ -165,25 +131,19 @@ func NamedTypeOrigin(named *types.Named) types.Type {
 	return named
 }
 
-// Term holds information about a structural type restriction.
-type Term struct {
-	tilde bool
-	typ   types.Type
-}
+// Term is a placeholder type, as type parameters are not supported at this Go
+// version. Its methods panic on use.
+type Term struct{}
 
-func (m *Term) Tilde() bool      { return m.tilde }
-func (m *Term) Type() types.Type { return m.typ }
-func (m *Term) String() string {
-	pre := ""
-	if m.tilde {
-		pre = "~"
-	}
-	return pre + m.typ.String()
-}
+func (*Term) Tilde() bool            { unsupported(); return false }
+func (*Term) Type() types.Type       { unsupported(); return nil }
+func (*Term) String() string         { unsupported(); return "" }
+func (*Term) Underlying() types.Type { unsupported(); return nil }
 
 // NewTerm is unsupported at this Go version, and panics.
 func NewTerm(tilde bool, typ types.Type) *Term {
-	return &Term{tilde, typ}
+	unsupported()
+	return nil
 }
 
 // Union is a placeholder type, as type parameters are not supported at this Go
@@ -202,23 +162,16 @@ func NewUnion(terms []*Term) *Union {
 // InitInstanceInfo is a noop at this Go version.
 func InitInstanceInfo(*types.Info) {}
 
-// Instance is a placeholder type, as type parameters are not supported at this
-// Go version.
-type Instance struct {
-	TypeArgs *TypeList
-	Type     types.Type
-}
+// GetInstance returns nothing, as type parameters are not supported at this Go
+// version.
+func GetInstance(*types.Info, *ast.Ident) (*TypeList, types.Type) { return nil, nil }
 
-// GetInstances returns a nil map, as type parameters are not supported at this
-// Go version.
-func GetInstances(info *types.Info) map[*ast.Ident]Instance { return nil }
-
-// Context is a placeholder type, as type parameters are not supported at
+// Environment is a placeholder type, as type parameters are not supported at
 // this Go version.
-type Context struct{}
+type Environment struct{}
 
 // Instantiate is unsupported on this Go version, and panics.
-func Instantiate(ctxt *Context, typ types.Type, targs []types.Type, validate bool) (types.Type, error) {
+func Instantiate(env *Environment, typ types.Type, targs []types.Type, validate bool) (types.Type, error) {
 	unsupported()
 	return nil, nil
 }

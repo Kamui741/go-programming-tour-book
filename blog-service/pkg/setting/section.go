@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
  * @Date: 2021-12-31 01:26:45
- * @LastEditTime: 2021-12-31 01:33:43
+ * @LastEditTime: 2022-01-03 20:51:12
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/pkg/setting/section.go
@@ -13,7 +13,7 @@ import "time"
 type ServerSettingS struct {
 	RunMode      string
 	HttpPort     string
-	ReadTimeOut  time.Duration
+	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 }
 
