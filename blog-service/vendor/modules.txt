@@ -11,6 +11,11 @@ github.com/PuerkitoBio/urlesc
 ## explicit
 github.com/alecthomas/template
 github.com/alecthomas/template/parse
+# github.com/dgrijalva/jwt-go v3.2.0+incompatible
+## explicit
+github.com/dgrijalva/jwt-go
+# github.com/eddycjy/opentracing-gorm v0.0.0-20200209120330-eafd654cdd8a
+## explicit
 # github.com/fsnotify/fsnotify v1.5.1
 ## explicit; go 1.13
 github.com/fsnotify/fsnotify
@@ -51,6 +56,16 @@ github.com/go-playground/universal-translator
 github.com/go-playground/validator/v10
 github.com/go-playground/validator/v10/translations/en
 github.com/go-playground/validator/v10/translations/zh
+# github.com/go-programming-tour-book/blog-service v0.0.0-20211007070625-fc62a2672eb7
+## explicit; go 1.13
+github.com/go-programming-tour-book/blog-service/global
+github.com/go-programming-tour-book/blog-service/pkg/app
+github.com/go-programming-tour-book/blog-service/pkg/convert
+github.com/go-programming-tour-book/blog-service/pkg/errcode
+github.com/go-programming-tour-book/blog-service/pkg/logger
+github.com/go-programming-tour-book/blog-service/pkg/setting
+github.com/go-programming-tour-book/blog-service/pkg/util
+github.com/go-programming-tour-book/blog-service/pkg/validator
 # github.com/go-sql-driver/mysql v1.5.0
 ## explicit; go 1.10
 github.com/go-sql-driver/mysql
@@ -105,6 +120,10 @@ github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
 ## explicit; go 1.12
 github.com/modern-go/reflect2
+# github.com/opentracing/opentracing-go v1.1.0
+## explicit
+github.com/opentracing/opentracing-go
+github.com/opentracing/opentracing-go/log
 # github.com/pelletier/go-toml v1.9.4
 ## explicit; go 1.12
 github.com/pelletier/go-toml

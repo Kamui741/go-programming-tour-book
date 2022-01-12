@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2021-12-31 14:20:11
- * @LastEditTime: 2022-01-09 22:52:17
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/pkg/logger/logger.go
- */
 package logger
 
 import (
@@ -47,7 +39,6 @@ func (l Level) String() string {
 		return "fatal"
 	case LevelPanic:
 		return "panic"
-
 	}
 	return ""
 }
@@ -59,10 +50,11 @@ type Logger struct {
 	callers   []string
 }
 
-func NewLogger(w io.Writer, perfix string, flag int) *Logger {
-	l := log.New(w, perfix, flag)
+func NewLogger(w io.Writer, prefix string, flag int) *Logger {
+	l := log.New(w, prefix, flag)
 	return &Logger{newLogger: l}
 }
+
 func (l *Logger) clone() *Logger {
 	nl := *l
 	return &nl
@@ -78,6 +70,7 @@ func (l *Logger) WithFields(f Fields) *Logger {
 	}
 	return ll
 }
+
 func (l *Logger) WithContext(ctx context.Context) *Logger {
 	ll := l.clone()
 	ll.ctx = ctx
@@ -91,9 +84,11 @@ func (l *Logger) WithCaller(skip int) *Logger {
 		f := runtime.FuncForPC(pc)
 		ll.callers = []string{fmt.Sprintf("%s: %d %s", file, line, f.Name())}
 	}
+
 	return ll
 }
-func (l *Logger) WithCallersFarmes() *Logger {
+
+func (l *Logger) WithCallersFrames() *Logger {
 	maxCallerDepth := 25
 	minCallerDepth := 1
 	callers := []string{}
@@ -101,7 +96,8 @@ func (l *Logger) WithCallersFarmes() *Logger {
 	depth := runtime.Callers(minCallerDepth, pcs)
 	frames := runtime.CallersFrames(pcs[:depth])
 	for frame, more := frames.Next(); more; frame, more = frames.Next() {
-		callers = append(callers, fmt.Sprintf("%s: %d %s", frame.File, frame.Line, frame.Function))
+		s := fmt.Sprintf("%s: %d %s", frame.File, frame.Line, frame.Function)
+		callers = append(callers, s)
 		if !more {
 			break
 		}
@@ -121,6 +117,7 @@ func (l *Logger) WithTrace() *Logger {
 	}
 	return l
 }
+
 func (l *Logger) JSONFormat(level Level, message string) map[string]interface{} {
 	data := make(Fields, len(l.fields)+4)
 	data["level"] = level.String()
@@ -134,6 +131,7 @@ func (l *Logger) JSONFormat(level Level, message string) map[string]interface{} 
 			}
 		}
 	}
+
 	return data
 }
 
@@ -154,7 +152,6 @@ func (l *Logger) Output(level Level, message string) {
 	case LevelPanic:
 		l.newLogger.Panic(content)
 	}
-
 }
 
 func (l *Logger) Debug(ctx context.Context, v ...interface{}) {

@@ -1,12 +1,17 @@
 /*
  * @Author: ChZheng
  * @Date: 2022-01-03 17:10:38
- * @LastEditTime: 2022-01-03 17:11:55
+ * @LastEditTime: 2022-01-09 21:43:35
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/internal/service/tag.go
  */
 package service
+
+import (
+	"go-programming-tour-book/blog-service/internal/model"
+	"go-programming-tour-book/blog-service/pkg/app"
+)
 
 type CountTagRequest struct {
 	Name  string `form:"name" binding:"max=100"`
@@ -33,4 +38,24 @@ type UpdateTagRequest struct {
 
 type DeleteTagRequest struct {
 	ID uint32 `form:"id" binding:"required,gte=1"`
+}
+
+func (svc *Service) CountTag(param *CountTagRequest) (int, error) {
+	return svc.dao.CountTag(param.Name, param.State)
+}
+
+func (svc *Service) GetTagList(param *TagListRequest, pager *app.Pager) ([]*model.Tag, error) {
+	return svc.dao.GetTagList(param.Name, param.State, pager.Page, pager.PageSize)
+}
+
+func (svc *Service) CreateTag(param *CreateTagRequest) error {
+	return svc.dao.CreateTag(param.Name, param.State, param.CreatedBy)
+}
+
+func (svc *Service) UpdateTag(param *UpdateTagRequest) error {
+	return svc.dao.UpdateTag(param.ID, param.Name, param.State, param.ModifiedBy)
+}
+
+func (svc *Service) DeleteTag(param *DeleteTagRequest) error {
+	return svc.dao.DeleteTag(param.ID)
 }
