@@ -3,9 +3,10 @@ Server:
   HttpPort: 8000
   ReadTimeout: 60
   WriteTimeout: 60
-APP:
+App:
   DefaultPageSize: 10
   MaxPageSize: 100
+  DefaultContextTimeout: 60
   LogSavePath: storage/logs
   LogFileName: app
   LogFileExt: .log
@@ -16,10 +17,23 @@ APP:
     - .jpg
     - .jpeg
     - .png
+Email:
+  Host: smtp.qq.com
+  Port: 465
+  UserName: xxx
+  Password: xxx
+  IsSSL: true
+  From: xxx
+  To:
+    - xxx
+JWT:
+  Secret: eddycjy
+  Issuer: blog-service
+  Expire: 7200
 Database:
   DBType: mysql
-  Username: root
-  Password:
+  UserName: root
+  Password: rootroot
   Host: 127.0.0.1:3306
   DBName: blog_service
   TablePrefix: blog_

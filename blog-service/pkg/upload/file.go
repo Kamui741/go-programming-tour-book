@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
- * @Date: 2022-01-10 22:38:25
- * @LastEditTime: 2022-01-10 23:16:08
+ * @Date: 2022-01-20 21:47:07
+ * @LastEditTime: 2022-01-20 21:53:40
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/pkg/upload/file.go
@@ -9,14 +9,15 @@
 package upload
 
 import (
-	"go-programming-tour-book/blog-service/global"
-	"go-programming-tour-book/blog-service/pkg/util"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"os"
 	"path"
 	"strings"
+
+	"go-programming-tour-book/blog-service/global"
+	"go-programming-tour-book/blog-service/pkg/util"
 )
 
 type FileType int
@@ -27,17 +28,25 @@ func GetFileName(name string) string {
 	ext := GetFileExt(name)
 	fileName := strings.TrimSuffix(name, ext)
 	fileName = util.EncodeMD5(fileName)
+
 	return fileName + ext
 }
+
 func GetFileExt(name string) string {
 	return path.Ext(name)
 }
+
 func GetSavePath() string {
 	return global.AppSetting.UploadSavePath
 }
 
+func GetServerUrl() string {
+	return global.AppSetting.UploadServerUrl
+}
+
 func CheckSavePath(dst string) bool {
 	_, err := os.Stat(dst)
+
 	return os.IsNotExist(err)
 }
 
@@ -51,7 +60,9 @@ func CheckContainExt(t FileType, name string) bool {
 				return true
 			}
 		}
+
 	}
+
 	return false
 }
 
@@ -64,11 +75,13 @@ func CheckMaxSize(t FileType, f multipart.File) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
-func CheckPermissions(dst string) bool {
+func CheckPermission(dst string) bool {
 	_, err := os.Stat(dst)
+
 	return os.IsPermission(err)
 }
 
@@ -77,8 +90,10 @@ func CreateSavePath(dst string, perm os.FileMode) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
+
 func SaveFile(file *multipart.FileHeader, dst string) error {
 	src, err := file.Open()
 	if err != nil {
@@ -91,6 +106,7 @@ func SaveFile(file *multipart.FileHeader, dst string) error {
 		return err
 	}
 	defer out.Close()
+
 	_, err = io.Copy(out, src)
 	return err
 }

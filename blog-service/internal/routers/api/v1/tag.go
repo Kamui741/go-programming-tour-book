@@ -1,21 +1,12 @@
-/*
- * @Author: ChZheng
- * @Date: 2021-12-30 15:47:44
- * @LastEditTime: 2022-01-09 21:38:37
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/internal/routers/api/v1/tag.go
- */
 package v1
 
 import (
+	"github.com/gin-gonic/gin"
 	"go-programming-tour-book/blog-service/global"
 	"go-programming-tour-book/blog-service/internal/service"
 	"go-programming-tour-book/blog-service/pkg/app"
 	"go-programming-tour-book/blog-service/pkg/convert"
 	"go-programming-tour-book/blog-service/pkg/errcode"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Tag struct{}

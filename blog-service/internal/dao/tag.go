@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
- * @Date: 2022-01-09 22:39:36
- * @LastEditTime: 2022-01-09 22:48:01
+ * @Date: 2022-01-20 21:47:07
+ * @LastEditTime: 2022-01-20 21:50:50
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/internal/dao/tag.go
@@ -10,8 +10,7 @@ package dao
 
 import (
 	"go-programming-tour-book/blog-service/internal/model"
-
-	"github.com/go-programming-tour-book/blog-service/pkg/app"
+	"go-programming-tour-book/blog-service/pkg/app"
 )
 
 func (d *Dao) GetTag(id uint32, state uint8) (model.Tag, error) {

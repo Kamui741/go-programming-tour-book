@@ -1,21 +1,19 @@
-/*
- * @Author: ChZheng
- * @Date: 2021-12-30 15:10:29
- * @LastEditTime: 2022-01-08 22:45:00
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/internal/model/model.go
- */
 package model
 
 import (
 	"fmt"
-	"go-programming-tour-book/blog-service/global"
-	"go-programming-tour-book/blog-service/pkg/setting"
 	"time"
 
+	otgorm "github.com/eddycjy/opentracing-gorm"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"go-programming-tour-book/blog-service/global"
+	"go-programming-tour-book/blog-service/pkg/setting"
+)
+
+const (
+	STATE_OPEN  = 1
+	STATE_CLOSE = 0
 )
 
 type Model struct {
@@ -41,6 +39,7 @@ func NewDBEngine(databaseSetting *setting.DatabaseSettingS) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if global.ServerSetting.RunMode == "debug" {
 		db.LogMode(true)
 	}
@@ -50,17 +49,19 @@ func NewDBEngine(databaseSetting *setting.DatabaseSettingS) (*gorm.DB, error) {
 	db.Callback().Delete().Replace("gorm:delete", deleteCallback)
 	db.DB().SetMaxIdleConns(databaseSetting.MaxIdleConns)
 	db.DB().SetMaxOpenConns(databaseSetting.MaxOpenConns)
+	otgorm.AddGormCallbacks(db)
 	return db, nil
 }
 
 func updateTimeStampForCreateCallback(scope *gorm.Scope) {
 	if !scope.HasError() {
 		nowTime := time.Now().Unix()
-		if creareTimeField, ok := scope.FieldByName("CreatedOn"); ok {
-			if creareTimeField.IsBlank {
-				_ = creareTimeField.Set(nowTime)
+		if createTimeField, ok := scope.FieldByName("CreatedOn"); ok {
+			if createTimeField.IsBlank {
+				_ = createTimeField.Set(nowTime)
 			}
 		}
+
 		if modifyTimeField, ok := scope.FieldByName("ModifiedOn"); ok {
 			if modifyTimeField.IsBlank {
 				_ = modifyTimeField.Set(nowTime)
@@ -68,17 +69,20 @@ func updateTimeStampForCreateCallback(scope *gorm.Scope) {
 		}
 	}
 }
+
 func updateTimeStampForUpdateCallback(scope *gorm.Scope) {
-	if _, ok := scope.Get("gorm.update_column"); !ok {
+	if _, ok := scope.Get("gorm:update_column"); !ok {
 		_ = scope.SetColumn("ModifiedOn", time.Now().Unix())
 	}
 }
+
 func deleteCallback(scope *gorm.Scope) {
 	if !scope.HasError() {
 		var extraOption string
-		if str, ok := scope.Get("gorm.delete_option"); ok {
+		if str, ok := scope.Get("gorm:delete_option"); ok {
 			extraOption = fmt.Sprint(str)
 		}
+
 		deletedOnField, hasDeletedOnField := scope.FieldByName("DeletedOn")
 		isDelField, hasIsDelField := scope.FieldByName("IsDel")
 		if !scope.Search.Unscoped && hasDeletedOnField && hasIsDelField {
@@ -103,6 +107,7 @@ func deleteCallback(scope *gorm.Scope) {
 		}
 	}
 }
+
 func addExtraSpaceIfExist(str string) string {
 	if str != "" {
 		return " " + str

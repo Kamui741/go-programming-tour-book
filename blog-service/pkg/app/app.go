@@ -1,18 +1,10 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-01-01 16:32:56
- * @LastEditTime: 2022-01-01 16:42:14
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/pkg/app/app.go
- */
 package app
 
 import (
-	"go-programming-tour-book/blog-service/pkg/errcode"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go-programming-tour-book/blog-service/pkg/errcode"
 )
 
 type Response struct {
@@ -29,7 +21,9 @@ type Pager struct {
 }
 
 func NewResponse(ctx *gin.Context) *Response {
-	return &Response{Ctx: ctx}
+	return &Response{
+		Ctx: ctx,
+	}
 }
 
 func (r *Response) ToResponse(data interface{}) {
@@ -49,11 +43,13 @@ func (r *Response) ToResponseList(list interface{}, totalRows int) {
 		},
 	})
 }
+
 func (r *Response) ToErrorResponse(err *errcode.Error) {
 	response := gin.H{"code": err.Code(), "msg": err.Msg()}
 	details := err.Details()
 	if len(details) > 0 {
 		response["details"] = details
 	}
+
 	r.Ctx.JSON(err.StatusCode(), response)
 }

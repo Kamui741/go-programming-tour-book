@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2021-12-30 22:16:03
- * @LastEditTime: 2022-01-08 23:05:09
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/pkg/errcode/errcode.go
- */
 package errcode
 
 import (

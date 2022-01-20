@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-01-03 17:10:38
- * @LastEditTime: 2022-01-09 21:43:35
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/internal/service/tag.go
- */
 package service
 
 import (

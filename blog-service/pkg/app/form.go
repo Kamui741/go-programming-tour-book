@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
- * @Date: 2022-01-03 18:13:34
- * @LastEditTime: 2022-01-03 20:31:51
+ * @Date: 2022-01-20 21:47:07
+ * @LastEditTime: 2022-01-20 21:52:23
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /go-programming-tour-book/blog-service/pkg/app/form.go
@@ -36,6 +36,7 @@ func (v ValidErrors) Errors() []string {
 	for _, err := range v {
 		errs = append(errs, err.Error())
 	}
+
 	return errs
 }
 
@@ -56,7 +57,9 @@ func BindAndValid(c *gin.Context, v interface{}) (bool, ValidErrors) {
 				Message: value,
 			})
 		}
+
 		return false, errs
 	}
+
 	return true, nil
 }

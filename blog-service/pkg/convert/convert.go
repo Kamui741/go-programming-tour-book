@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-01-01 16:19:30
- * @LastEditTime: 2022-01-01 16:24:24
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/pkg/convert/convert.go
- */
 package convert
 
 import "strconv"

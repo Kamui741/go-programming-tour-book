@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-01-08 23:03:17
- * @LastEditTime: 2022-01-08 23:03:18
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/pkg/errcode/module_code.go
- */
 package errcode
 
 var (

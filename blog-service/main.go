@@ -1,47 +1,68 @@
-/*
- * @Author: ChZheng
- * @Date: 2021-12-28 14:36:51
- * @LastEditTime: 2022-01-03 18:11:21
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /go-programming-tour-book/blog-service/main.go
- */
 package main
 
 import (
-	"go-programming-tour-book/blog-service/global"
-	"go-programming-tour-book/blog-service/internal/model"
-	routers "go-programming-tour-book/blog-service/internal/routers"
-	"go-programming-tour-book/blog-service/pkg/logger"
-	"go-programming-tour-book/blog-service/pkg/setting"
+	"context"
+	_ "expvar"
+	"flag"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 	"time"
 
+	"go-programming-tour-book/blog-service/pkg/tracer"
+
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"go-programming-tour-book/blog-service/global"
+	"go-programming-tour-book/blog-service/internal/model"
+	"go-programming-tour-book/blog-service/internal/routers"
+	"go-programming-tour-book/blog-service/pkg/logger"
+	"go-programming-tour-book/blog-service/pkg/setting"
+	"go-programming-tour-book/blog-service/pkg/validator"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+var (
+	port      string
+	runMode   string
+	config    string
+	isVersion bool
+)
+
 func init() {
-	err := setupSetting()
+	err := setupFlag()
 	if err != nil {
 		log.Fatalf("init.setupFlag err: %v", err)
 	}
-	err = setupDBEngine()
+	err = setupSetting()
 	if err != nil {
-		log.Fatalf("init.setupDBEngine err: %v", err)
+		log.Fatalf("init.setupSetting err: %v", err)
 	}
 	err = setupLogger()
 	if err != nil {
 		log.Fatalf("init.setupLogger err: %v", err)
 	}
-
+	err = setupDBEngine()
+	if err != nil {
+		log.Fatalf("init.setupDBEngine err: %v", err)
+	}
+	err = setupValidator()
+	if err != nil {
+		log.Fatalf("init.setupValidator err: %v", err)
+	}
+	err = setupTracer()
+	if err != nil {
+		log.Fatalf("init.setupTracer err: %v", err)
+	}
 }
 
 // @title 博客系统
 // @version 1.0
 // @description Go 语言编程之旅：一起用 Go 做项目
-// @termsOfService https://github.com/go-programming-tour-book
+// @termsOfService https://go-programming-tour-book
 func main() {
 	gin.SetMode(global.ServerSetting.RunMode)
 	router := routers.NewRouter()
@@ -52,37 +73,77 @@ func main() {
 		WriteTimeout:   global.ServerSetting.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
-	s.ListenAndServe()
+
+	go func() {
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("s.ListenAndServe err: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shuting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exiting")
 }
+
+func setupFlag() error {
+	flag.StringVar(&port, "port", "", "启动端口")
+	flag.StringVar(&runMode, "mode", "", "启动模式")
+	flag.StringVar(&config, "config", "configs/", "指定要使用的配置文件路径")
+	flag.BoolVar(&isVersion, "version", false, "编译信息")
+	flag.Parse()
+
+	return nil
+}
+
 func setupSetting() error {
-	setting, err := setting.NewSetting()
+	s, err := setting.NewSetting(strings.Split(config, ",")...)
 	if err != nil {
 		return err
 	}
-	err = setting.ReadSection("Server", &global.ServerSetting)
+	err = s.ReadSection("Server", &global.ServerSetting)
 	if err != nil {
 		return err
 	}
-	err = setting.ReadSection("App", &global.AppSetting)
+	err = s.ReadSection("App", &global.AppSetting)
 	if err != nil {
 		return err
 	}
-	err = setting.ReadSection("Database", &global.DatabaseSetting)
+	err = s.ReadSection("Database", &global.DatabaseSetting)
 	if err != nil {
 		return err
 	}
+	err = s.ReadSection("JWT", &global.JWTSetting)
+	if err != nil {
+		return err
+	}
+	err = s.ReadSection("Email", &global.EmailSetting)
+	if err != nil {
+		return err
+	}
+
+	global.AppSetting.DefaultContextTimeout *= time.Second
+	global.JWTSetting.Expire *= time.Second
 	global.ServerSetting.ReadTimeout *= time.Second
 	global.ServerSetting.WriteTimeout *= time.Second
-	return nil
-}
-func setupDBEngine() error {
-	var err error
-	global.DBEngine, err = model.NewDBEngine(global.DatabaseSetting)
-	if err != nil {
-		return err
+	if port != "" {
+		global.ServerSetting.HttpPort = port
 	}
+	if runMode != "" {
+		global.ServerSetting.RunMode = runMode
+	}
+
 	return nil
 }
+
 func setupLogger() error {
 	fileName := global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt
 	global.Logger = logger.NewLogger(&lumberjack.Logger{
@@ -92,5 +153,32 @@ func setupLogger() error {
 		LocalTime: true,
 	}, "", log.LstdFlags).WithCaller(2)
 
+	return nil
+}
+
+func setupDBEngine() error {
+	var err error
+	global.DBEngine, err = model.NewDBEngine(global.DatabaseSetting)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setupValidator() error {
+	global.Validator = validator.NewCustomValidator()
+	global.Validator.Engine()
+	binding.Validator = global.Validator
+
+	return nil
+}
+
+func setupTracer() error {
+	jaegerTracer, _, err := tracer.NewJaegerTracer("blog-service", "127.0.0.1:6831")
+	if err != nil {
+		return err
+	}
+	global.Tracer = jaegerTracer
 	return nil
 }
