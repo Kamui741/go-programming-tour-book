@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-01-23 01:09:44
- * @LastEditTime: 2022-01-23 01:13:39
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /tag-service/pkg/errcode/errcode.go
- */
 package errcode
 
 import "fmt"
@@ -24,12 +16,15 @@ func NewError(code int, msg string) *Error {
 	_codes[code] = msg
 	return &Error{code: code, msg: msg}
 }
+
 func (e *Error) Error() string {
 	return fmt.Sprintf("错误码：%d, 错误信息:：%s", e.Code(), e.Msg())
 }
+
 func (e *Error) Code() int {
 	return e.code
 }
+
 func (e *Error) Msg() string {
 	return e.msg
 }

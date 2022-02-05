@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-01-23 01:13:57
- * @LastEditTime: 2022-01-23 01:13:57
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /tag-service/pkg/errcode/common_error.go
- */
 package errcode
 
 var (

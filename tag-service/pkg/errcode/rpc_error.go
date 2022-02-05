@@ -1,11 +1,3 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-01-23 01:14:31
- * @LastEditTime: 2022-01-23 02:15:40
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /tag-service/pkg/errcode/rpc_error.go
- */
 package errcode
 
 import (
@@ -14,18 +6,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type Status struct {
-	*status.Status
-}
-
-func FromError(err error) *Status {
-	s, _ := status.FromError(err)
-	return &Status{s}
-}
-func ToRPCStatus(code int, msg string) *Status {
-	s, _ := status.New(ToRPCCode(code), msg).WithDetails(&pb.Error{Code: int32(code), Message: msg})
-	return &Status{s}
-}
 func TogRPCError(err *Error) error {
 	s, _ := status.New(ToRPCCode(err.Code()), err.Msg()).WithDetails(&pb.Error{Code: int32(err.Code()), Message: err.Msg()})
 	return s.Err()
@@ -55,4 +35,18 @@ func ToRPCCode(code int) codes.Code {
 	}
 
 	return statusCode
+}
+
+type Status struct {
+	*status.Status
+}
+
+func ToRPCStatus(code int, msg string) *Status {
+	s, _ := status.New(ToRPCCode(code), msg).WithDetails(&pb.Error{Code: int32(code), Message: msg})
+	return &Status{s}
+}
+
+func FromError(err error) *Status {
+	s, _ := status.FromError(err)
+	return &Status{s}
 }
