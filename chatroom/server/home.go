@@ -1,7 +1,7 @@
 /*
  * @Author: ChZheng
- * @Date: 2022-02-21 23:17:24
- * @LastEditTime: 2022-02-22 21:15:10
+ * @Date: 2022-02-25 00:26:12
+ * @LastEditTime: 2022-02-25 00:29:37
  * @LastEditors: ChZheng
  * @Description:
  * @FilePath: /chatroom/server/home.go
@@ -9,20 +9,39 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
-	"go-programming-tour-book/chatroom/template"
+	"html/template"
 	"net/http"
+
+	"go-programming-tour-book/chatroom/global"
+	"go-programming-tour-book/chatroom/logic"
 )
 
 func homeHandleFunc(w http.ResponseWriter, req *http.Request) {
-	tpl, err := template.ParseFiles(rootDir + "/template/home.html")
+	tpl, err := template.ParseFiles(global.RootDir + "/template/home.html")
 	if err != nil {
 		fmt.Fprint(w, "模板解析错误！")
 		return
 	}
+
 	err = tpl.Execute(w, nil)
 	if err != nil {
 		fmt.Fprint(w, "模板执行错误！")
 		return
+	}
+}
+
+func userListHandleFunc(w http.ResponseWriter, req *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	userList := logic.Broadcaster.GetUserList()
+	b, err := json.Marshal(userList)
+
+	if err != nil {
+		fmt.Fprint(w, `[]`)
+	} else {
+		fmt.Fprint(w, string(b))
 	}
 }

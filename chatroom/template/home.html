@@ -1,11 +1,3 @@
-<!--
- * @Author: ChZheng
- * @Date: 2022-02-21 22:47:48
- * @LastEditTime: 2022-02-21 23:15:30
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /chatroom/template/home.html
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -157,9 +149,9 @@
                             // 欢迎消息
                             that.curUser = data.user;
                             localStorage.setItem('user', JSON.stringify(data.user));
-
+                            
                             data.user = {nickname: '', uid: 0};
-
+                            
                             that.fetchUserList();
                         } else if (data.type == 2) {
                             // 某个用户进入
@@ -280,7 +272,7 @@
                 if (data.content == "") {
                     return;
                 }
-
+                
                 that = this;
                 if (data.ats != null) {
                     data.ats.forEach(function(nickname) {

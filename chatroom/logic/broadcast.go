@@ -1,13 +1,23 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-02-21 22:46:04
- * @LastEditTime: 2022-02-22 23:44:38
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /chatroom/logic/broadcast.go
- */
 package logic
 
+import (
+	"expvar"
+	"fmt"
+	"log"
+
+	"go-programming-tour-book/chatroom/global"
+)
+
+func init() {
+	expvar.Publish("message_queue", expvar.Func(calcMessageQueueLen))
+}
+
+func calcMessageQueueLen() interface{} {
+	fmt.Println("===len=:", len(Broadcaster.messageChannel))
+	return len(Broadcaster.messageChannel)
+}
+
+// broadcaster 广播器
 type broadcaster struct {
 	// 所有聊天室用户
 	users map[string]*User
@@ -41,33 +51,69 @@ var Broadcaster = &broadcaster{
 	usersChannel:        make(chan []*User),
 }
 
-func (b *broadcaster) CanEnterRoom(nickname string) bool {
-	b.checkUserChannel <- nickname
-	return <-b.checkUserCanInChannel
-}
+// Start 启动广播器
+// 需要在一个新 goroutine 中运行，因为它不会返回
 func (b *broadcaster) Start() {
 	for {
 		select {
 		case user := <-b.enteringChannel:
+			// 新用户进入
 			b.users[user.NickName] = user
-			b.sendUserList()
+
+			OfflineProcessor.Send(user)
 		case user := <-b.leavingChannel:
+			// 用户离开
 			delete(b.users, user.NickName)
+			// 避免 goroutine 泄露
 			user.CloseMessageChannel()
-			b.sendUserList()
 		case msg := <-b.messageChannel:
+			// 给所有在线用户发送消息
 			for _, user := range b.users {
 				if user.UID == msg.User.UID {
 					continue
 				}
 				user.MessageChannel <- msg
 			}
+			OfflineProcessor.Save(msg)
 		case nickname := <-b.checkUserChannel:
 			if _, ok := b.users[nickname]; ok {
 				b.checkUserCanInChannel <- false
 			} else {
 				b.checkUserCanInChannel <- true
 			}
+		case <-b.requestUsersChannel:
+			userList := make([]*User, 0, len(b.users))
+			for _, user := range b.users {
+				userList = append(userList, user)
+			}
+
+			b.usersChannel <- userList
 		}
 	}
+}
+
+func (b *broadcaster) UserEntering(u *User) {
+	b.enteringChannel <- u
+}
+
+func (b *broadcaster) UserLeaving(u *User) {
+	b.leavingChannel <- u
+}
+
+func (b *broadcaster) Broadcast(msg *Message) {
+	if len(b.messageChannel) >= global.MessageQueueLen {
+		log.Println("broadcast queue 满了")
+	}
+	b.messageChannel <- msg
+}
+
+func (b *broadcaster) CanEnterRoom(nickname string) bool {
+	b.checkUserChannel <- nickname
+
+	return <-b.checkUserCanInChannel
+}
+
+func (b *broadcaster) GetUserList() []*User {
+	b.requestUsersChannel <- struct{}{}
+	return <-b.usersChannel
 }

@@ -1,14 +1,10 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-02-21 22:46:15
- * @LastEditTime: 2022-02-22 23:10:58
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /chatroom/logic/message.go
- */
 package logic
 
-import "time"
+import (
+	"time"
+
+	"github.com/spf13/cast"
+)
 
 const (
 	MsgTypeNormal    = iota // 普通 用户消息
@@ -33,4 +29,53 @@ type Message struct {
 
 	// 用户列表不通过 WebSocket 下发
 	// Users []*User `json:"users"`
+}
+
+func NewMessage(user *User, content, clientTime string) *Message {
+	message := &Message{
+		User:    user,
+		Type:    MsgTypeNormal,
+		Content: content,
+		MsgTime: time.Now(),
+	}
+	if clientTime != "" {
+		message.ClientSendTime = time.Unix(0, cast.ToInt64(clientTime))
+	}
+	return message
+}
+
+func NewWelcomeMessage(user *User) *Message {
+	return &Message{
+		User:    user,
+		Type:    MsgTypeWelcome,
+		Content: user.NickName + " 您好，欢迎加入聊天室！",
+		MsgTime: time.Now(),
+	}
+}
+
+func NewUserEnterMessage(user *User) *Message {
+	return &Message{
+		User:    user,
+		Type:    MsgTypeUserEnter,
+		Content: user.NickName + " 加入了聊天室",
+		MsgTime: time.Now(),
+	}
+}
+
+func NewUserLeaveMessage(user *User) *Message {
+	return &Message{
+		User:    user,
+		Type:    MsgTypeUserLeave,
+		Content: user.NickName + " 离开了聊天室",
+		MsgTime: time.Now(),
+	}
+}
+
+func NewErrorMessage(content string) *Message {
+	return &Message{
+		User:    System,
+		Type:    MsgTypeError,
+		Content: content,
+		MsgTime: time.Now(),
+	}
 }

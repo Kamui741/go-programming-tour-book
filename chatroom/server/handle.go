@@ -1,20 +1,16 @@
-/*
- * @Author: ChZheng
- * @Date: 2022-02-21 22:46:50
- * @LastEditTime: 2022-02-21 23:03:01
- * @LastEditors: ChZheng
- * @Description:
- * @FilePath: /chatroom/server/handle.go
- */
 package server
 
 import (
 	"net/http"
+
+	"go-programming-tour-book/chatroom/logic"
 )
 
 func RegisterHandle() {
-	inferRootDir()
-	go logic.Broadcast.Start()
+	// 广播消息处理
+	go logic.Broadcaster.Start()
+
 	http.HandleFunc("/", homeHandleFunc)
-	http.HandleFunc("/ws", webSocketHandleFunc)
+	http.HandleFunc("/user_list", userListHandleFunc)
+	http.HandleFunc("/ws", WebSocketHandleFunc)
 }

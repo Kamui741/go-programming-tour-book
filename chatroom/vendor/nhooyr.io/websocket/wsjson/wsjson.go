@@ -1,4 +1,4 @@
-// Package wsjson provides helpers for reading and writing JSON messages.
+// Package wsjson provides websocket helpers for JSON messages.
 package wsjson // import "nhooyr.io/websocket/wsjson"
 
 import (
@@ -8,21 +8,27 @@ import (
 
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/internal/bpool"
-	"nhooyr.io/websocket/internal/errd"
 )
 
-// Read reads a JSON message from c into v.
-// It will reuse buffers in between calls to avoid allocations.
+// Read reads a json message from c into v.
+// It will reuse buffers to avoid allocations.
 func Read(ctx context.Context, c *websocket.Conn, v interface{}) error {
-	return read(ctx, c, v)
+	err := read(ctx, c, v)
+	if err != nil {
+		return fmt.Errorf("failed to read json: %w", err)
+	}
+	return nil
 }
 
-func read(ctx context.Context, c *websocket.Conn, v interface{}) (err error) {
-	defer errd.Wrap(&err, "failed to read JSON message")
-
-	_, r, err := c.Reader(ctx)
+func read(ctx context.Context, c *websocket.Conn, v interface{}) error {
+	typ, r, err := c.Reader(ctx)
 	if err != nil {
 		return err
+	}
+
+	if typ != websocket.MessageText {
+		c.Close(websocket.StatusUnsupportedData, "can only accept text messages")
+		return fmt.Errorf("unexpected frame type for json (expected %v): %v", websocket.MessageText, typ)
 	}
 
 	b := bpool.Get()
@@ -36,32 +42,39 @@ func read(ctx context.Context, c *websocket.Conn, v interface{}) (err error) {
 	err = json.Unmarshal(b.Bytes(), v)
 	if err != nil {
 		c.Close(websocket.StatusInvalidFramePayloadData, "failed to unmarshal JSON")
-		return fmt.Errorf("failed to unmarshal JSON: %w", err)
+		return fmt.Errorf("failed to unmarshal json: %w", err)
 	}
 
 	return nil
 }
 
-// Write writes the JSON message v to c.
-// It will reuse buffers in between calls to avoid allocations.
+// Write writes the json message v to c.
+// It will reuse buffers to avoid allocations.
 func Write(ctx context.Context, c *websocket.Conn, v interface{}) error {
-	return write(ctx, c, v)
+	err := write(ctx, c, v)
+	if err != nil {
+		return fmt.Errorf("failed to write json: %w", err)
+	}
+	return nil
 }
 
-func write(ctx context.Context, c *websocket.Conn, v interface{}) (err error) {
-	defer errd.Wrap(&err, "failed to write JSON message")
-
+func write(ctx context.Context, c *websocket.Conn, v interface{}) error {
 	w, err := c.Writer(ctx, websocket.MessageText)
 	if err != nil {
 		return err
 	}
 
-	// json.Marshal cannot reuse buffers between calls as it has to return
-	// a copy of the byte slice but Encoder does as it directly writes to w.
-	err = json.NewEncoder(w).Encode(v)
+	// We use Encode because it automatically enables buffer reuse without us
+	// needing to do anything. Though see https://github.com/golang/go/issues/27735
+	e := json.NewEncoder(w)
+	err = e.Encode(v)
 	if err != nil {
-		return fmt.Errorf("failed to marshal JSON: %w", err)
+		return fmt.Errorf("failed to encode json: %w", err)
 	}
 
-	return w.Close()
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
